@@ -1,0 +1,11 @@
+.DEFAULT: setconfig
+.PHONY : .DEFAULT setconfig guiconfig menuconfig
+
+setconfig:
+	@_python3@ -- @_script@ setconfig
+
+guiconfig:
+	@_python3@ -- @_script@ guiconfig
+
+menuconfig:
+	@_python3@ -- @_script@ menuconfig
