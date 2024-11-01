@@ -10,7 +10,7 @@
 #include "exception.hxx"
 
 
-namespace p5::refrigerator::singleton {
+namespace p5::refrigerator::core {
 namespace private_ {
 
 namespace parent_ = this_;
@@ -186,4 +186,4 @@ this_::Type::Type() noexcept(true):
     ); }
 }
 
-} // namespace p5::refrigerator
+} // namespace p5::refrigerator::core

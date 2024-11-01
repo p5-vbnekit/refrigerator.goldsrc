@@ -19,11 +19,11 @@ void inject(
     ::p5::lambda::engine::Functions const *functions,
     ::p5::lambda::engine::Globals *globals
 ) noexcept(true) {
-    auto &singleton_ = this_::Singleton::instance();
+    auto &core_ = this_::Core::instance();
 
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    singleton_.log.write<LogLevel_::Developer>()
+    core_.log.write<LogLevel_::Developer>()
     << "globals = " << static_cast<void const *>(globals)
     << ", functions = " << functions;
 
@@ -36,19 +36,19 @@ void inject(
             "functions pointer is null"
         };
 
-        singleton_.api.engine.globals = globals;
-        singleton_.api.engine.functions = *functions;
+        core_.api.engine.globals = globals;
+        core_.api.engine.functions = *functions;
     }
 
     catch(...) {
-        singleton_.log.write<LogLevel_::Error>(
+        core_.log.write<LogLevel_::Error>(
             this_::exception::generate_details()
         );
 
         return;
     }
 
-    singleton_.log.write<LogLevel_::Developer>() << "success";
+    core_.log.write<LogLevel_::Developer>() << "success";
 }
 
 // `Meta_Query` - metamod requesting info about this plugin:
@@ -60,11 +60,11 @@ void inject(
     ::p5::lambda::metamod::plugin::Info **plugin,
     ::p5::lambda::metamod::Functions const *functions
 ) noexcept(true) {
-    auto &singleton_ = this_::Singleton::instance();
+    auto &core_ = this_::Core::instance();
 
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    singleton_.log.write<LogLevel_::Developer>()
+    core_.log.write<LogLevel_::Developer>()
     << "interface version = \"" << (version ? version : "nullptr")
     << "\", plugin = " << static_cast<void const *>(plugin)
     << ", functions = " << static_cast<void const *>(functions);
@@ -89,7 +89,7 @@ void inject(
             "functions pointer is null"
         };
 
-        auto &api_ = singleton_.api;
+        auto &api_ = core_.api;
 
         auto const plugin_version_ = [
             pointer_ = api_.meta.plugin.info.interface_version
@@ -120,7 +120,7 @@ void inject(
         api_.meta.functions = *functions;
 
         try {
-            auto &container_ = singleton_.container();
+            auto &container_ = core_.container();
             container_.collect();
             if (&(api_) != &(
                 container_.get<::std::decay_t<decltype(api_)> const>().resolve()
@@ -131,14 +131,14 @@ void inject(
     }
 
     catch(...) {
-        singleton_.log.write<LogLevel_::Error>(
+        core_.log.write<LogLevel_::Error>(
             this_::exception::generate_details()
         );
 
         return ::p5::lambda::common::IntegerBoolean::False;
     }
 
-    singleton_.log.write<LogLevel_::Developer>() << "success";
+    core_.log.write<LogLevel_::Developer>() << "success";
 
     return ::p5::lambda::common::IntegerBoolean::True;
 }
@@ -154,11 +154,11 @@ void inject(
     ::p5::lambda::metamod::Globals *globals,
     ::p5::lambda::game::functions::Pointers const *game
 ) noexcept(true) {
-    auto &singleton_ = this_::Singleton::instance();
+    auto &core_ = this_::Core::instance();
 
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    singleton_.log.write<LogLevel_::Developer>()
+    core_.log.write<LogLevel_::Developer>()
     << "phase = " << static_cast<::std::size_t>(phase)
     << ", plugin = " << static_cast<void const *>(plugin)
     << ", globals = " << static_cast<void const *>(globals)
@@ -187,26 +187,26 @@ void inject(
             "\new\" game functions pointer is null"
         };
 
-        if (! singleton_.api.engine.globals) throw ::std::logic_error{
+        if (! core_.api.engine.globals) throw ::std::logic_error{
             "invalid state: `GiveFnptrsToDll` success expected"
         };
 
-        *plugin = singleton_.api.meta.plugin.functions;
+        *plugin = core_.api.meta.plugin.functions;
 
-        singleton_.api.meta.globals = globals;
-        singleton_.api.game.functions.standard = *standard_;
-        singleton_.api.game.functions.extension = *extension_;
+        core_.api.meta.globals = globals;
+        core_.api.game.functions.standard = *standard_;
+        core_.api.game.functions.extension = *extension_;
     }
 
     catch(...) {
-        singleton_.log.write<LogLevel_::Error>(
+        core_.log.write<LogLevel_::Error>(
             this_::exception::generate_details()
         );
 
         return ::p5::lambda::common::IntegerBoolean::False;
     }
 
-    singleton_.log.write<LogLevel_::Developer>() << "success";
+    core_.log.write<LogLevel_::Developer>() << "success";
 
     return ::p5::lambda::common::IntegerBoolean::True;
 }
@@ -218,28 +218,28 @@ void inject(
     ::p5::lambda::metamod::plugin::LoadTime phase,
     ::p5::lambda::metamod::plugin::UnloadReason reason
 ) noexcept(true) {
-    auto &singleton_ = this_::Singleton::instance();
+    auto &core_ = this_::Core::instance();
 
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    singleton_.log.write<LogLevel_::Developer>()
+    core_.log.write<LogLevel_::Developer>()
     << "phase = " << static_cast<::std::size_t>(phase)
     << ", reason = " << static_cast<::std::size_t>(reason);
 
     try {
-        singleton_.api.meta.globals = nullptr;
-        singleton_.api.game.functions = {};
+        core_.api.meta.globals = nullptr;
+        core_.api.game.functions = {};
     }
 
     catch(...) {
-        singleton_.log.write<LogLevel_::Error>(
+        core_.log.write<LogLevel_::Error>(
             this_::exception::generate_details()
         );
 
         return ::p5::lambda::common::IntegerBoolean::False;
     }
 
-    singleton_.log.write<LogLevel_::Developer>() << "success";
+    core_.log.write<LogLevel_::Developer>() << "success";
 
     return ::p5::lambda::common::IntegerBoolean::True;
 }

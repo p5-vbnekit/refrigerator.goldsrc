@@ -147,13 +147,13 @@ inline static auto on_shutdown(auto &context) noexcept(true) {
 auto const * this_::Type::Context_::inject_() noexcept(true) {
     namespace root_ = this_::private_::root;
 
-    auto &singleton_ = root_::Singleton::instance();
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    auto &core_ = root_::Core::instance();
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    auto &&injection_ = [&singleton_] {
-        auto &&context_ = [&singleton_] {
-            auto const &engine_ = singleton_.api.engine;
-            auto &&trusted_ = singleton_.container().get<
+    auto &&injection_ = [&core_] {
+        auto &&context_ = [&core_] {
+            auto const &engine_ = core_.api.engine;
+            auto &&trusted_ = core_.container().get<
                 parent_::TrustedEntities
             >(::std::rethrow_exception);
             auto * const pointer_ = new this_::Type::Context_{
@@ -164,21 +164,21 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             >{pointer_};
         } ();
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Init
         >([&context_ = *context_] () {
             this_::private_::on_init(context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Frame
         >([&context_ = *context_] {
             this_::private_::on_frame(context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Shutdown
         >([&context_ = *context_] {
@@ -189,11 +189,11 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
     };
 
     try {
-        singleton_.container().inject<this_::Type>(
+        core_.container().inject<this_::Type>(
             ::std::in_place_t{}, ::std::move(injection_)
         );
     } catch(...) {
-        singleton_.log.write<LogLevel_::Error>()
+        core_.log.write<LogLevel_::Error>()
         << root_::exception::generate_details();
     }
 

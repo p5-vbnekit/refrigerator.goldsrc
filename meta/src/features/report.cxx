@@ -192,16 +192,16 @@ inline static auto on_client_command_(
 }
 
 [[maybe_unused]] inline static void const * const injection_ = [] {
-    auto &singleton_ = this_::root_::Singleton::instance();
+    auto &core_ = this_::root_::Core::instance();
 
-    auto const &log_ = singleton_.log;
+    auto const &log_ = core_.log;
     using LogLevel_ = ::std::decay_t<decltype(log_)>::Message::Level;
 
-    try { singleton_.container().inject([&singleton_] {
-        singleton_.bindings.inject<
+    try { core_.container().inject([&core_] {
+        core_.bindings.inject<
             this_::root_::binding::Phase::After,
             this_::root_::bindings::game::ClientCommand
-        >([&engine_ = singleton_.api.engine] (auto *entity) {
+        >([&engine_ = core_.api.engine] (auto *entity) {
             if (entity) this_::on_client_command_(engine_, *entity);
         });
         return parent_::Type{};

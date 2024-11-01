@@ -214,18 +214,18 @@ inline static auto on_shutdown(auto &context) noexcept(true) {
 auto const * this_::Type::Context_::inject_() noexcept(true) {
     namespace root_ = this_::private_::root;
 
-    auto &singleton_ = root_::Singleton::instance();
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    auto &core_ = root_::Core::instance();
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    auto &&injection_ = [&singleton_] {
+    auto &&injection_ = [&core_] {
         auto &&context_ = ::std::make_shared<this_::Type::Context_>();
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::engine::CreateEntity
         >([
-            &globals_ = singleton_.api.meta.globals,
-            &context_ = *context_, &log_ = singleton_.log
+            &globals_ = core_.api.meta.globals,
+            &context_ = *context_, &log_ = core_.log
         ] () {
             if (! globals_) return;
             try { this_::private_::on_create(*globals_, context_); }
@@ -235,19 +235,19 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             }
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::engine::RemoveEntity
         >([&context_ = *context_] (auto *entity) {
             this_::private_::on_remove(context_, entity);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::engine::CreateNamedEntity
         >([
-            &globals_ = singleton_.api.meta.globals,
-            &context_ = *context_, &log_ = singleton_.log
+            &globals_ = core_.api.meta.globals,
+            &context_ = *context_, &log_ = core_.log
         ] (auto) {
             if (! globals_) return;
             try { this_::private_::on_create(*globals_, context_); }
@@ -257,17 +257,17 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             }
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Init
         >([&context_ = *context_] () {
             this_::private_::on_init(context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Spawn
-        >([&context_ = *context_, &log_ = singleton_.log] (auto *entity) {
+        >([&context_ = *context_, &log_ = core_.log] (auto *entity) {
             try { this_::private_::on_spawn(context_, entity); }
             catch (...) {
                 log_.write<LogLevel_::Error>()
@@ -275,14 +275,14 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             }
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Frame
         >([&context_ = *context_] {
             this_::private_::on_frame(context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Shutdown
         >([&context_ = *context_] {
@@ -293,11 +293,11 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
     };
 
     try {
-        singleton_.container().inject<this_::Type>(
+        core_.container().inject<this_::Type>(
             ::std::in_place_t{}, ::std::move(injection_)
         );
     } catch(...) {
-        singleton_.log.write<LogLevel_::Error>()
+        core_.log.write<LogLevel_::Error>()
         << root_::exception::generate_details();
     }
 

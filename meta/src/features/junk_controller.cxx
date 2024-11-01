@@ -121,11 +121,11 @@ inline static auto on_game_frame(auto const &engine, auto &context) noexcept(tru
         return static_cast<::std::decay_t<decltype(value_)>>(0);
     } (); 0 < overage_; --overage_) {
         auto * const entity_ = context.assigned.front();
-        auto const &log_ = this_::root::Singleton::instance().log;
+        auto const &log_ = this_::root::Core::instance().log;
         log_.write() << "removing overage: " << entity_;
         try { deity_.remove_entity(entity_); }
         catch (...) {
-            auto const &log_ = this_::root::Singleton::instance().log;
+            auto const &log_ = this_::root::Core::instance().log;
             log_.write<
                 ::std::decay_t<decltype(log_)>::Message::Level::Warning
             >() << "failed to remove entity [" << entity_ << "]: "
@@ -133,7 +133,7 @@ inline static auto on_game_frame(auto const &engine, auto &context) noexcept(tru
         }
         if (context.assigned.empty()) break;
         if (entity_ == context.assigned.front()) {
-            auto const &log_ = this_::root::Singleton::instance().log;
+            auto const &log_ = this_::root::Core::instance().log;
             log_.write<
                 ::std::decay_t<decltype(log_)>::Message::Level::Warning
             >() << "entity [" << entity_ << "] not removed";
@@ -148,13 +148,13 @@ inline static auto on_game_frame(auto const &engine, auto &context) noexcept(tru
 auto const * this_::Type::Context_::inject_() noexcept(true) {
     namespace root_ = this_::private_::root;
 
-    auto &singleton_ = root_::Singleton::instance();
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    auto &core_ = root_::Core::instance();
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    auto &&injection_ = [&singleton_] {
-        auto const &container_ = singleton_.container();
+    auto &&injection_ = [&core_] {
+        auto const &container_ = core_.container();
 
-        auto const &trusted_ = singleton_.container().get<
+        auto const &trusted_ = core_.container().get<
             parent_::TrustedEntities const
         >(::std::rethrow_exception).resolve();
 
@@ -176,21 +176,21 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             this_::private_::on_leave_trusted(context_, entities);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Init
         >([&context_ = *context_] () {
             this_::private_::reset_context(context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Frame
-        >([&engine_ = singleton_.api.engine, &context_ = *context_] {
+        >([&engine_ = core_.api.engine, &context_ = *context_] {
             this_::private_::on_game_frame(engine_, context_);
         }).take()));
 
-        context_->bindings.push_front(::std::move(singleton_.bindings.inject<
+        context_->bindings.push_front(::std::move(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Shutdown
         >([&context_ = *context_] {
@@ -201,11 +201,11 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
     };
 
     try {
-        singleton_.container().inject<this_::Type>(
+        core_.container().inject<this_::Type>(
             ::std::in_place_t{}, ::std::move(injection_)
         );
     } catch(...) {
-        singleton_.log.write<LogLevel_::Error>()
+        core_.log.write<LogLevel_::Error>()
         << root_::exception::generate_details();
     }
 

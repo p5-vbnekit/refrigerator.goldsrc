@@ -124,20 +124,20 @@ inline static auto make_entity_weight(
 inline static auto on_game_init(auto &context) noexcept(true) {
     if (context.bad) return;
 
-    auto const &singleton_ = this_::root::Singleton::instance();
+    auto const &core_ = this_::root::Core::instance();
 
     try {
         if (context.state) throw ::std::logic_error{"initialized already"};
         context.state.emplace(::std::decay_t<
             decltype(*(context.state))
-        >{.api{::std::decay_t<decltype(context.state->api)>{singleton_.api}}});
+        >{.api{::std::decay_t<decltype(context.state->api)>{core_.api}}});
     }
 
     catch (...) {
         context.bad = true;
         context.state = ::std::nullopt;
-        singleton_.log.write<
-            ::std::decay_t<decltype(singleton_.log)>::Message::Level::Error
+        core_.log.write<
+            ::std::decay_t<decltype(core_.log)>::Message::Level::Error
         >() << "visibility_controller.on_game_init failure: "
         << this_::root::exception::generate_details();
     }
@@ -146,12 +146,12 @@ inline static auto on_game_init(auto &context) noexcept(true) {
 inline static auto on_new_frame(auto &context) noexcept(true) {
     if (context.bad) return;
 
-    auto const &singleton_ = this_::root::Singleton::instance();
+    auto const &core_ = this_::root::Core::instance();
 
     try {
         if (! context.state) context.state.emplace(::std::decay_t<
             decltype(*(context.state))
-        >{.api{::std::decay_t<decltype(context.state->api)>{singleton_.api}}});
+        >{.api{::std::decay_t<decltype(context.state->api)>{core_.api}}});
         auto &state_ = *(context.state);
 
         state_.limit.machine.on_new_frame(state_.api);
@@ -159,7 +159,7 @@ inline static auto on_new_frame(auto &context) noexcept(true) {
         if ((0 < limit_) && (state_.limit.hard < limit_)) {
             state_.limit.hard = limit_;
             state_.limit.soft = limit_ - (limit_ / 16);
-            singleton_.log.write()
+            core_.log.write()
             << "visibility limit reached: hard = " << limit_
             << ", soft = " << state_.limit.soft;
         }
@@ -174,8 +174,8 @@ inline static auto on_new_frame(auto &context) noexcept(true) {
     catch (...) {
         context.bad = true;
         context.state = ::std::nullopt;
-        singleton_.log.write<
-            ::std::decay_t<decltype(singleton_.log)>::Message::Level::Error
+        core_.log.write<
+            ::std::decay_t<decltype(core_.log)>::Message::Level::Error
         >() << "visibility_controller.on_new_frame failure: "
         << this_::root::exception::generate_details();
     }
@@ -190,7 +190,7 @@ inline static auto on_add_to_full_pack(
     >;
 
     auto result_ = Result_{.meta = Result_::Meta::Ignored, .value = 1};
-    auto const &singleton_ = this_::root::Singleton::instance();
+    auto const &core_ = this_::root::Core::instance();
 
     if (! context.bad) try {
         if (! context.state) throw ::std::logic_error{"not initialized"};
@@ -299,8 +299,8 @@ inline static auto on_add_to_full_pack(
     catch (...) {
         context.bad = true;
         context.state = ::std::nullopt;
-        singleton_.log.write<
-            ::std::decay_t<decltype(singleton_.log)>::Message::Level::Error
+        core_.log.write<
+            ::std::decay_t<decltype(core_.log)>::Message::Level::Error
         >() << "visibility_controller.on_add_to_full_pack failure: "
         << this_::root::exception::generate_details();
     }
@@ -318,10 +318,10 @@ inline static auto on_game_shutdown(auto &context) noexcept(true) {
 auto const * this_::Type::Context_::inject_() noexcept(true) {
     namespace root_ = this_::private_::root;
 
-    auto &singleton_ = root_::Singleton::instance();
-    using LogLevel_ = ::std::decay_t<decltype(singleton_.log)>::Message::Level;
+    auto &core_ = root_::Core::instance();
+    using LogLevel_ = ::std::decay_t<decltype(core_.log)>::Message::Level;
 
-    auto &&injection_ = [&singleton_] {
+    auto &&injection_ = [&core_] {
         auto &&context_ = [] {
             auto * const pointer_ = new this_::Type::Context_{};
             return ::std::shared_ptr<
@@ -329,21 +329,21 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             >{pointer_};
         } ();
 
-        context_->bindings.push_front(singleton_.bindings.inject<
+        context_->bindings.push_front(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Init
         >([&context_ = *context_] () {
             this_::private_::on_game_init(context_);
         }).take());
 
-        context_->bindings.push_front(singleton_.bindings.inject<
+        context_->bindings.push_front(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::Frame
         >([&context_ = *context_] () {
             this_::private_::on_new_frame(context_);
         }).take());
 
-        context_->bindings.push_front(singleton_.bindings.inject<
+        context_->bindings.push_front(core_.bindings.inject<
             root_::binding::Phase::After,
             root_::bindings::game::AddToFullPack
         >([&context_ = *context_] (
@@ -354,7 +354,7 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
             context_, client, index, source, destination
         ); }).take());
 
-        context_->bindings.push_front(singleton_.bindings.inject<
+        context_->bindings.push_front(core_.bindings.inject<
             root_::binding::Phase::Before,
             root_::bindings::game::Shutdown
         >([&context_ = *context_] () {
@@ -365,11 +365,11 @@ auto const * this_::Type::Context_::inject_() noexcept(true) {
     };
 
     try {
-        singleton_.container().inject<this_::Type>(
+        core_.container().inject<this_::Type>(
             ::std::in_place_t{}, ::std::move(injection_)
         );
     } catch(...) {
-        singleton_.log.write<LogLevel_::Error>()
+        core_.log.write<LogLevel_::Error>()
         << root_::exception::generate_details();
     }
 

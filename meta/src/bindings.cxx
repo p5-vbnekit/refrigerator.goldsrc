@@ -81,7 +81,7 @@ template <parent_::Phase phase> inline static auto action_handler(
 namespace target_ = parent_::parent_::binding::target;
 
 using LogMessage_ = ::std::decay_t<decltype(
-    parent_::parent_::Singleton::instance().log
+    parent_::parent_::Core::instance().log
 )>::Message;
 
 template <parent_::Phase phase, class Target> inline static auto target_handler(
@@ -108,8 +108,8 @@ template <parent_::Phase phase, class Target> inline static auto target_handler(
         }
     } ();
 
-    auto const &singleton_ = parent_::parent_::Singleton::instance();
-    auto const &log_ = singleton_.log;
+    auto const &core_ = parent_::parent_::Core::instance();
+    auto const &log_ = core_.log;
 
     auto &&response_ = [&] (auto const &state) {
         ::std::visit([&state_, &log_] (auto const &state) {
@@ -156,7 +156,7 @@ template <parent_::Phase phase, class Target> inline static auto target_handler(
         } (), .response = ::std::move(response_)
     });
 
-    if (auto * const globals_ = singleton_.api.meta.globals) {
+    if (auto * const globals_ = core_.api.meta.globals) {
         globals_->current = state_.meta;
     }
 
@@ -246,7 +246,7 @@ struct this_::Type::Private_::Executor_<T, O(I ...)> final {
         using Traits_ = this_::private_::target_::Traits<T>;
         static_assert(::std::is_same_v<typename Traits_::Prototype, O(I ...)>);
         if (auto * const dispatcher_ = [] {
-            auto &pointer_ = parent_::Singleton::instance().bindings.private_;
+            auto &pointer_ = parent_::Core::instance().bindings.private_;
             if (pointer_) return &(pointer_->dispatcher);
             return static_cast<::std::decay_t<
                 decltype(pointer_->dispatcher)
@@ -262,7 +262,7 @@ template <this_::Phase phase> inline
 ::p5::lambda::common::IntegerBoolean this_::Type::Private_::api(
     ::p5::lambda::game::functions::Standard *functions, int version
 ) noexcept(true) {
-    auto const &singleton_ = parent_::Singleton::instance();
+    auto const &core_ = parent_::Core::instance();
 
     try {
         if (! functions) throw ::std::invalid_argument{
@@ -278,11 +278,11 @@ template <this_::Phase phase> inline
             throw ::std::invalid_argument{stream_.view().data()};
         }
         *functions = {};
-        if (! singleton_.bindings.private_) throw ::std::logic_error{
+        if (! core_.bindings.private_) throw ::std::logic_error{
             "invalid state"
         };
     } catch (...) {
-        singleton_.log.write<this_::private_::LogMessage_::Level::Error>(
+        core_.log.write<this_::private_::LogMessage_::Level::Error>(
             this_::private_::LogMessage_::Location::current()
         ) << parent_::exception::generate_details();
         return ::p5::lambda::common::IntegerBoolean::False;
@@ -308,7 +308,7 @@ template <this_::Phase phase> inline
 ::p5::lambda::common::IntegerBoolean this_::Type::Private_::api(
     ::p5::lambda::game::functions::Standard *functions, int *version
 ) noexcept(true) {
-    auto const &log_ = parent_::Singleton::instance().log;
+    auto const &log_ = parent_::Core::instance().log;
 
     try {
         if (! functions) throw ::std::invalid_argument{
@@ -340,7 +340,7 @@ template <this_::Phase phase> inline
 ::p5::lambda::common::IntegerBoolean this_::Type::Private_::api(
     ::p5::lambda::game::functions::Extension *functions, int *version
 ) noexcept(true) {
-    auto const &singleton_ = parent_::Singleton::instance();
+    auto const &core_ = parent_::Core::instance();
 
     try {
         if (! functions) throw ::std::invalid_argument{
@@ -359,11 +359,11 @@ template <this_::Phase phase> inline
             throw ::std::invalid_argument{stream_.view().data()};
         }
         *functions = {};
-        if (! singleton_.bindings.private_) throw ::std::logic_error{
+        if (! core_.bindings.private_) throw ::std::logic_error{
             "invalid state"
         };
     } catch (...) {
-        singleton_.log.write<this_::private_::LogMessage_::Level::Error>(
+        core_.log.write<this_::private_::LogMessage_::Level::Error>(
             this_::private_::LogMessage_::Location::current()
         ) << parent_::exception::generate_details();
         return ::p5::lambda::common::IntegerBoolean::False;
@@ -380,7 +380,7 @@ template <this_::Phase phase> inline
 ::p5::lambda::common::IntegerBoolean this_::Type::Private_::api(
     ::p5::lambda::engine::Functions *functions, int *version
 ) noexcept(true) {
-    auto const &singleton_ = parent_::Singleton::instance();
+    auto const &core_ = parent_::Core::instance();
 
     try {
         if (! functions) throw ::std::invalid_argument{
@@ -399,11 +399,11 @@ template <this_::Phase phase> inline
             throw ::std::invalid_argument{stream_.view().data()};
         }
         *functions = {};
-        if (! singleton_.bindings.private_) throw ::std::logic_error{
+        if (! core_.bindings.private_) throw ::std::logic_error{
             "invalid state"
         };
     } catch (...) {
-        singleton_.log.write<this_::private_::LogMessage_::Level::Error>(
+        core_.log.write<this_::private_::LogMessage_::Level::Error>(
             this_::private_::LogMessage_::Location::current()
         ) << parent_::exception::generate_details();
         return ::p5::lambda::common::IntegerBoolean::False;
@@ -425,11 +425,11 @@ template <this_::Phase phase> inline
 }
 
 inline auto const * this_::Type::Private_::initialize_() noexcept(true) {
-    auto &singleton_ = parent_::Singleton::instance();
+    auto &core_ = parent_::Core::instance();
 
     try {
-        singleton_.bindings.private_.reset(new Private_);
-    } catch (...) { singleton_.log.write<
+        core_.bindings.private_.reset(new Private_);
+    } catch (...) { core_.log.write<
         this_::private_::LogMessage_::Level::Error
     >(
         this_::private_::LogMessage_::Location::current()

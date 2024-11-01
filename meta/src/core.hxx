@@ -14,10 +14,10 @@
 
 
 namespace p5::refrigerator {
-namespace singleton {
+namespace core {
 
 namespace parent_ = this_;
-namespace this_ = parent_::singleton;
+namespace this_ = parent_::core;
 
 using Api = parent_::Api;
 using Log = parent_::Log::Interface;
@@ -68,8 +68,8 @@ private:
     Type & operator = (Type const &) = delete;
 };
 
-} // namespace singleton
+} // namespace core
 
-using Singleton = singleton::Type;
+using Core = core::Type;
 
 } // namespace p5::refrigerator
