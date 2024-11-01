@@ -11,9 +11,9 @@
 #include <p5/lambda/api.hxx>
 #include <p5/lambda/utils/event/dispatcher.hxx>
 
+#include "core.hxx"
 #include "bindings.hxx"
 #include "exception.hxx"
-#include "singleton.hxx"
 
 
 namespace p5::refrigerator::bindings {

@@ -11,10 +11,10 @@
 #include <p5/lambda/utils/container/pointer.hxx>
 #include <p5/lambda/utils/event/subscription.hxx>
 
+#include "../core.hxx"
 #include "../binding.hxx"
 #include "../bindings.hxx"
 #include "../exception.hxx"
-#include "../singleton.hxx"
 
 #include "butchering.hxx"
 #include "junk_controller.hxx"

@@ -10,10 +10,10 @@
 #include <p5/lambda/utils/event/subscription.hxx>
 
 #include "../api.hxx"
+#include "../core.hxx"
 #include "../binding.hxx"
 #include "../bindings.hxx"
 #include "../exception.hxx"
-#include "../singleton.hxx"
 
 #include "deity.hxx"
 #include "trusted_entities.hxx"

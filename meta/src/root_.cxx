@@ -6,9 +6,9 @@
 #include <string_view>
 #include <type_traits>
 
+#include "core.hxx"
 #include "root_.hxx"
 #include "exception.hxx"
-#include "singleton.hxx"
 
 
 namespace p5::refrigerator {

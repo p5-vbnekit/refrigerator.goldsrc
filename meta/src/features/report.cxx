@@ -5,10 +5,10 @@
 #include <string_view>
 #include <type_traits>
 
+#include "../core.hxx"
 #include "../binding.hxx"
 #include "../bindings.hxx"
 #include "../exception.hxx"
-#include "../singleton.hxx"
 
 #include "report.hxx"
 
