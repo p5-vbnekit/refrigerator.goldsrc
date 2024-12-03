@@ -290,6 +290,12 @@ template <this_::Phase phase> inline
     functions->gameInit = Executor_<this_::game::Init>::template execute<phase>;
     functions->spawn = Executor_<this_::game::Spawn>::template execute<phase>;
     functions->think = Executor_<this_::game::Think>::template execute<phase>;
+    functions->clientDisconnect = Executor_<
+        this_::game::ClientDisconnect
+    >::template execute<phase>;
+    functions->clientPutInServer = Executor_<
+        this_::game::ClientPutInServer
+    >::template execute<phase>;
     functions->clientCommand = Executor_<
         this_::game::ClientCommand
     >::template execute<phase>;

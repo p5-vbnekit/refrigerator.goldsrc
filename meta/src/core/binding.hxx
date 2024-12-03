@@ -67,6 +67,18 @@ struct Think final {
     )>;
 };
 
+struct ClientDisconnect final {
+    using Prototype = ::std::remove_reference_t<decltype(
+        *(related_::Functions::Standard::clientDisconnect)
+    )>;
+};
+
+struct ClientPutInServer final {
+    using Prototype = ::std::remove_reference_t<decltype(
+        *(related_::Functions::Standard::clientPutInServer)
+    )>;
+};
+
 struct ClientCommand final {
     using Prototype = ::std::remove_reference_t<decltype(
         *(related_::Functions::Standard::clientCommand)
@@ -143,6 +155,8 @@ template <class T> inline consteval static auto is_game() noexcept(true) {
         parent_::targets::game::Init,
         parent_::targets::game::Spawn,
         parent_::targets::game::Think,
+        parent_::targets::game::ClientDisconnect,
+        parent_::targets::game::ClientPutInServer,
         parent_::targets::game::ClientCommand,
         parent_::targets::game::StartFrame,
         parent_::targets::game::AddToFullPack,
